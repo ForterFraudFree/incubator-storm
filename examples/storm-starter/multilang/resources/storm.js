@@ -21,10 +21,6 @@ function sendpid(heartbeatdir){
     fs.closeSync(fs.openSync(heartbeatdir + "/" + pid, "w"));
 }
 
-function ack(tup) {
-    sendMsgToParent({"command": "ack", "id": tup.id});
-}
-
 function fail(tup) {
     sendMsgToParent({"command": "fail", "id": tup.id});
 }
@@ -213,63 +209,85 @@ BasicBolt.prototype.handleNewCommand = function(command) {
     var tup = new Tuple(command["id"], command["comp"], command["stream"], command["task"], command["tuple"]);
     this.anchorTuple = tup;
     this.process(tup);
-    ack(tup);
+    this.ack(tup);
 }
 
+BasicBolt.prototype.ack = function(tup) {
+    sendMsgToParent({"command": "ack", "id": tup.id});
+}
 
-//function Spout() {};
-//Spout.prototype.initialize = function(conf, context) {};
-//
-//Spout.prototype.ack = function(id) {};
-//
-//Spout.prototype.fail = function(id) {};
-//
-//Spout.prototype.nextTuple = function() {};
-//
-//Spout.prototype.run = function() {
-//        var setupInfo = initComponent();
-//        var conf = setupInfo[0];
-//        var context = setupInfo[1];
-//        this.initialize(conf, context);
-//
-//        try {
-//            while(true) {
-//                var msg = readCommand();
-//                if (msg["command"] === "next") {
-//                    self.nextTuple();
-//                }
-//
-//                if (msg["command"] === "ack") {
-//                    self.ack(msg["id"]);
-//                }
-//
-//                if (msg["command"] === "fail") {
-//                    self.fail(msg["id"])
-//                }
-//                sync();
-//            }
-//        } catch(err) {
-//            log(err);
-//        }
-//}
-//
-//Spout.prototype.__emit = function(tup, stream, id, directTask) {
-//    m = {"command": "emit"};
-//    if (typeof id !== 'undefined') {
-//        m["id"] = id;
-//    }
-//
-//    if (typeof stream !== 'undefined') {
-//        m["stream"] = stream;
-//    }
-//
-//    if (typeof directTask !== 'undefined') {
-//        m["task"] = directTask;
-//    }
-//
-//    m["tuple"] = tup;
-//    sendMsgToParent(m);
-//}
+function Spout() {};
+Spout.prototype.initialize = function(conf, context) {};
+
+Spout.prototype.ack = function(id) {};
+
+Spout.prototype.fail = function(id) {};
+
+Spout.prototype.nextTuple = function(callback) {};
+
+Spout.prototype.handleNewCommand = function(command) {
+    var self = this;
+    var callback = function() {
+        self.sync();
+    }
+
+    if (command["command"] === "next") {
+        this.nextTuple(callback);
+    }
+
+    if (command["command"] === "ack") {
+        this.ack(msg["id"], callback);
+    }
+
+    if (command["command"] === "fail") {
+        this.fail(msg["id"], callback);
+    }
+}
+
+Spout.prototype.run = function() {
+        var setupInfo = initComponent();
+        var conf = setupInfo[0];
+        var context = setupInfo[1];
+        this.initialize(conf, context);
+
+        try {
+            while(true) {
+                var msg = readCommand();
+                if (msg["command"] === "next") {
+                    self.nextTuple();
+                }
+
+                if (msg["command"] === "ack") {
+                    self.ack(msg["id"]);
+                }
+
+                if (msg["command"] === "fail") {
+                    self.fail(msg["id"])
+                }
+                sync();
+            }
+        } catch(err) {
+            log(err);
+        }
+}
+
+Spout.prototype.__emit = function(tup, stream, id, directTask) {
+    var m = {"command": "emit"};
+    if (typeof id !== 'undefined') {
+        m["id"] = id;
+    }
+
+    if (typeof stream !== 'undefined') {
+        m["stream"] = stream;
+    }
+
+    if (typeof directTask !== 'undefined') {
+        m["task"] = directTask;
+    }
+
+    m["tuple"] = tup;
+    sendMsgToParent(m);
+}
 
 module.exports.BasicBolt = BasicBolt;
 module.exports.logToFile = logToFile;
