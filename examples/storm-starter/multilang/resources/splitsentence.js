@@ -8,7 +8,7 @@ function SplitSentenceBolt() {
 SplitSentenceBolt.prototype = new BasicBolt();
 SplitSentenceBolt.prototype = Object.create(BasicBolt.prototype);
 
-SplitSentenceBolt.prototype.process = function(tup) {
+SplitSentenceBolt.prototype.process = function(tup, callback) {
         var self = this;
         var words = tup.values[0].split(" ");
         words.forEach(function(word) {
@@ -16,11 +16,7 @@ SplitSentenceBolt.prototype.process = function(tup) {
                 storm.logToFile('Task id - ' + JSON.stringify(taskId) + ' work - ' + word);
             });
         });
-}
-
-SplitSentenceBolt.prototype.initialize = function(conf, context) {
-    storm.logToFile("CONF: " + JSON.stringify(conf));
-    storm.logToFile("CONTEXT: " + JSON.stringify(context));
+        callback();
 }
 
 new SplitSentenceBolt().run();

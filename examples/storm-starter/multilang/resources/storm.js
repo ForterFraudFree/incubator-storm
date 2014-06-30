@@ -6,29 +6,6 @@ function logToFile(msg) {
     fs.appendFileSync('/Users/anya/tmp/storm/log', msg + '\n\n\n');
 }
 
-function sendMsgToParent(msg){
-    logToFile('SEND MESSAGE TO PARENT: ' + JSON.stringify(msg));
-    var str = JSON.stringify(msg) + '\nend\n';
-    process.stdout.write(str);
-}
-
-function sync(){
-    sendMsgToParent({'command':'sync'});
-}
-
-function sendpid(heartbeatdir){
-    var pid = process.pid;
-    sendMsgToParent({'pid':pid})
-    fs.closeSync(fs.openSync(heartbeatdir + "/" + pid, "w"));
-}
-
-function fail(tup) {
-    sendMsgToParent({"command": "fail", "id": tup.id});
-}
-
-function log(msg) {
-    sendMsgToParent({"command": "log", "msg": msg});
-}
 
 function Storm() {
     this.lines = [];
@@ -40,8 +17,28 @@ Storm.prototype.logToFile = function(msg) {
     logToFile(this.name + ':\n' + msg);
 }
 
+Storm.prototype.sendMsgToParent = function(msg) {
+    logToFile('SEND MESSAGE TO PARENT: ' + JSON.stringify(msg));
+    var str = JSON.stringify(msg) + '\nend\n';
+    process.stdout.write(str);
+}
+
+Storm.prototype.sync = function() {
+    this.sendMsgToParent({'command':'sync'});
+}
+
+Storm.prototype.sendpid = function(heartbeatdir) {
+    var pid = process.pid;
+    this.sendMsgToParent({'pid':pid})
+    fs.closeSync(fs.openSync(heartbeatdir + "/" + pid, "w"));
+}
+
+Storm.prototype.log = function(msg) {
+    this.sendMsgToParent({"command": "log", "msg": msg});
+}
+
 Storm.prototype.initSetupInfo = function(setupInfo) {
-    sendpid(setupInfo['pidDir']);
+    this.sendpid(setupInfo['pidDir']);
     this.initialize(setupInfo['conf'], setupInfo['context']);
 }
 
@@ -128,7 +125,10 @@ Storm.prototype.emitDirect = function(tup, stream, id, directTask) {
     this.__emit(tup, stream, id, directTask)
 }
 
-Storm.prototype.initialize = function(conf, context) {}
+Storm.prototype.initialize = function(conf, context) {
+    this.logToFile("CONF: " + JSON.stringify(conf));
+    this.logToFile("CONTEXT: " + JSON.stringify(context));
+}
 
 Storm.prototype.run = function() {
     this.logToFile('run');
@@ -179,7 +179,7 @@ function BasicBolt() {
 BasicBolt.prototype = Object.create(Storm.prototype);
 BasicBolt.prototype.constructor = Storm;
 
-BasicBolt.prototype.process = function(tuple) {};
+BasicBolt.prototype.process = function(tuple, callback) {};
 
 BasicBolt.prototype.__emit = function(tup, stream, anchors, directTask) {
     var self = this;
@@ -206,19 +206,28 @@ BasicBolt.prototype.__emit = function(tup, stream, anchors, directTask) {
         m["task"] = directTask;
     }
     m["tuple"] = tup;
-    sendMsgToParent(m);
+    this.sendMsgToParent(m);
 }
 
 BasicBolt.prototype.handleNewCommand = function(command) {
+    var self = this;
     var tup = new Tuple(command["id"], command["comp"], command["stream"], command["task"], command["tuple"]);
-    this.logToFile('Anchor tuple: id - ' + command["id"] + ' tuple - ' + JSON.stringify(command['tuple']));
     this.anchorTuple = tup;
-    this.process(tup);
-    this.ack(tup);
+      var callback = function(err) {
+          if (err) {
+              self.fail()
+          }
+          self.ack(tup);
+      }
+    this.process(tup, callback);
 }
 
 BasicBolt.prototype.ack = function(tup) {
-    sendMsgToParent({"command": "ack", "id": tup.id});
+    this.sendMsgToParent({"command": "ack", "id": tup.id});
+}
+
+BasicBolt.prototype.fail = function(tup) {
+    this.sendMsgToParent({"command": "fail", "id": tup.id});
 }
 
 function Spout() {
@@ -241,7 +250,7 @@ Spout.prototype.nextTuple = function(callback) {};
 Spout.prototype.handleNewCommand = function(command) {
     var self = this;
     var callback = function() {
-        sync();
+        self.sync();
     }
 
     if (command["command"] === "next") {
@@ -272,10 +281,9 @@ Spout.prototype.__emit = function(tup, stream, id, directTask) {
     }
 
     m["tuple"] = tup;
-    sendMsgToParent(m);
+    this.sendMsgToParent(m);
 }
 
 module.exports.BasicBolt = BasicBolt;
 module.exports.logToFile = logToFile;
 module.exports.Spout = Spout;
-module.exports.log = log;
