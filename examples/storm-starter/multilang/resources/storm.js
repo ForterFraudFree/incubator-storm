@@ -214,8 +214,8 @@ BasicBolt.prototype.handleNewCommand = function(command) {
     var tup = new Tuple(command["id"], command["comp"], command["stream"], command["task"], command["tuple"]);
     this.anchorTuple = tup;
       var callback = function(err) {
-          if (err) {
-              self.fail()
+          if (!!err) {
+              self.fail(tup);
           }
           self.ack(tup);
       }
