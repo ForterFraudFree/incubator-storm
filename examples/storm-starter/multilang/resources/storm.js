@@ -1,3 +1,6 @@
+/**
+ * Base classes in node-js for storm Bolt and Spout.
+ */
 
 var fs = require('fs');
 
@@ -5,7 +8,6 @@ function logToFile(msg) {
 
     fs.appendFileSync('/Users/anya/tmp/storm/log', msg + '\n\n\n');
 }
-
 
 function Storm() {
     this.lines = [];

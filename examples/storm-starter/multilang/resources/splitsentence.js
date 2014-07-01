@@ -1,3 +1,7 @@
+/**
+ * Simple Bolt example - receives sentence and breaks it into words.
+ */
+
 var storm = require('./storm');
 var BasicBolt = storm.BasicBolt;
 
