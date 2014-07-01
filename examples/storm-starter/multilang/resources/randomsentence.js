@@ -21,16 +21,11 @@ function RandomSentenceSpout() {
     storm.logToFile('CREATE NEW RandomSentenceSpout');
 };
 
-RandomSentenceSpout.prototype = new Spout();
 RandomSentenceSpout.prototype = Object.create(Spout.prototype);
+RandomSentenceSpout.prototype.constructor = RandomSentenceSpout;
 
 RandomSentenceSpout.prototype.getRandomSentence = function() {
     return SENTENCES[getRandomInt(0, SENTENCES.length - 1)];
-}
-
-RandomSentenceSpout.prototype.initialize = function(conf, context) {
-    storm.logToFile("CONF: " + JSON.stringify(conf));
-    storm.logToFile("CONTEXT: " + JSON.stringify(context));
 }
 
 RandomSentenceSpout.prototype.nextTuple = function(callback) {

@@ -10,8 +10,8 @@ function SplitSentenceBolt() {
     BasicBolt.call(this);
 };
 
-SplitSentenceBolt.prototype = new BasicBolt();
 SplitSentenceBolt.prototype = Object.create(BasicBolt.prototype);
+SplitSentenceBolt.prototype.constructor = SplitSentenceBolt;
 
 SplitSentenceBolt.prototype.run = function() {
     var self = this;

@@ -38,8 +38,12 @@ Storm.prototype.log = function(msg) {
 }
 
 Storm.prototype.initSetupInfo = function(setupInfo) {
-    this.sendpid(setupInfo['pidDir']);
-    this.initialize(setupInfo['conf'], setupInfo['context']);
+    var self = this;
+    var callback = function() {
+        self.logToFile('Inside initialize callback, sending pid.')
+        self.sendpid(setupInfo['pidDir']);
+    }
+    this.initialize(setupInfo['conf'], setupInfo['context'], callback);
 }
 
 Storm.prototype.startReadingInput = function() {
@@ -125,9 +129,10 @@ Storm.prototype.emitDirect = function(tup, stream, id, directTask) {
     this.__emit(tup, stream, id, directTask)
 }
 
-Storm.prototype.initialize = function(conf, context) {
+Storm.prototype.initialize = function(conf, context, callback) {
     this.logToFile("CONF: " + JSON.stringify(conf));
     this.logToFile("CONTEXT: " + JSON.stringify(context));
+    callback();
 }
 
 Storm.prototype.run = function() {
@@ -177,7 +182,7 @@ function BasicBolt() {
 };
 
 BasicBolt.prototype = Object.create(Storm.prototype);
-BasicBolt.prototype.constructor = Storm;
+BasicBolt.prototype.constructor = BasicBolt;
 
 BasicBolt.prototype.process = function(tuple, callback) {};
 
@@ -235,11 +240,7 @@ function Spout() {
     this.name = 'SPOUT';
 };
 Spout.prototype = Object.create(Storm.prototype);
-Spout.prototype.constructor = Storm;
-
-Spout.prototype.initialize = function(conf, context) {
-    this.emit(['Spout Initializing']);
-};
+Spout.prototype.constructor = Spout;
 
 Spout.prototype.ack = function(id) {};
 

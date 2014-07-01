@@ -5,8 +5,8 @@ function SplitSentenceBolt() {
     BasicBolt.call(this);
 };
 
-SplitSentenceBolt.prototype = new BasicBolt();
 SplitSentenceBolt.prototype = Object.create(BasicBolt.prototype);
+SplitSentenceBolt.prototype.constructor = SplitSentenceBolt;
 
 SplitSentenceBolt.prototype.process = function(tup, callback) {
         var self = this;
