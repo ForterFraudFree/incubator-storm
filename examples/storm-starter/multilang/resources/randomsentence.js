@@ -16,9 +16,10 @@ var SENTENCES = [
     "snow white and the seven dwarfs",
     "i am at two with nature"]
 
-function RandomSentenceSpout() {
+function RandomSentenceSpout(sentences) {
     Spout.call(this);
     this.runningTupleId = getRandomInt(0,Math.pow(2,16));
+    this.sentences = sentences;
     this.pending = {};
 
     storm.logToFile('CREATE NEW RandomSentenceSpout');
@@ -28,7 +29,7 @@ RandomSentenceSpout.prototype = Object.create(Spout.prototype);
 RandomSentenceSpout.prototype.constructor = RandomSentenceSpout;
 
 RandomSentenceSpout.prototype.getRandomSentence = function() {
-    return SENTENCES[getRandomInt(0, SENTENCES.length - 1)];
+    return this.sentences[getRandomInt(0, this.sentences.length - 1)];
 }
 
 RandomSentenceSpout.prototype.nextTuple = function(done) {
@@ -57,4 +58,4 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-new RandomSentenceSpout().run();
+new RandomSentenceSpout(SENTENCES).run();
