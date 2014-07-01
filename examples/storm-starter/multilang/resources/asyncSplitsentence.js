@@ -15,16 +15,10 @@ function SplitSentenceBolt() {
 SplitSentenceBolt.prototype = Object.create(BasicBolt.prototype);
 SplitSentenceBolt.prototype.constructor = SplitSentenceBolt;
 
-SplitSentenceBolt.prototype.run = function() {
-    var self = this;
-    setTimeout(function() {
-        self.logToFile('run');
-        self.startReadingInput();
-    }, 500)
-}
-
 SplitSentenceBolt.prototype.process = function(tup, callback) {
     var self = this;
+
+    // Here setTimeout is not really needed, we use it to demonstrate asynchronous code in the process method:
     setTimeout(function() {
         var words = tup.values[0].split(" ");
         words.forEach(function(word) {
