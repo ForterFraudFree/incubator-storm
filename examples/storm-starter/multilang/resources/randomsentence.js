@@ -31,26 +31,26 @@ RandomSentenceSpout.prototype.getRandomSentence = function() {
     return SENTENCES[getRandomInt(0, SENTENCES.length - 1)];
 }
 
-RandomSentenceSpout.prototype.nextTuple = function(callback) {
+RandomSentenceSpout.prototype.nextTuple = function(done) {
     var sentence = this.getRandomSentence();
     var tup = [sentence];
     var id = this.runningTupleId;
     this.pending[id] = tup;
     this.emit(tup, null, id, null);
     this.runningTupleId++;
-    callback();
+    done();
 }
 
-RandomSentenceSpout.prototype.ack = function(id, callback) {
+RandomSentenceSpout.prototype.ack = function(id, done) {
     this.logToFile('RECEIVED ACK - ' + JSON.stringify(id));
     delete this.pending[id];
-    callback();
+    done();
 }
 
-RandomSentenceSpout.prototype.fail = function(id, callback) {
+RandomSentenceSpout.prototype.fail = function(id, done) {
     this.logToFile('RECEIVED FAIL - ' + JSON.stringify(id));
     this.emit(this.pending[id], null, id, null);
-    callback();
+    done();
 }
 
 function getRandomInt(min, max) {

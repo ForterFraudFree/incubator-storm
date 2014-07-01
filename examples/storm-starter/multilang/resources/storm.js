@@ -186,7 +186,7 @@ function BasicBolt() {
 BasicBolt.prototype = Object.create(Storm.prototype);
 BasicBolt.prototype.constructor = BasicBolt;
 
-BasicBolt.prototype.process = function(tuple, callback) {};
+BasicBolt.prototype.process = function(tuple, done) {};
 
 BasicBolt.prototype.__emit = function(tup, stream, anchors, directTask) {
     var self = this;
@@ -244,11 +244,11 @@ function Spout() {
 Spout.prototype = Object.create(Storm.prototype);
 Spout.prototype.constructor = Spout;
 
-Spout.prototype.ack = function(id) {};
+Spout.prototype.ack = function(id, done) {};
 
-Spout.prototype.fail = function(id) {};
+Spout.prototype.fail = function(id, done) {};
 
-Spout.prototype.nextTuple = function(callback) {};
+Spout.prototype.nextTuple = function(done) {};
 
 Spout.prototype.handleNewCommand = function(command) {
     var self = this;
