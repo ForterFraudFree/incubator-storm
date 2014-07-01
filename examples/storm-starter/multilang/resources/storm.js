@@ -12,7 +12,7 @@ function logToFile(msg) {
 function Storm() {
     this.lines = [];
     this.taskIdCallbacks = [];
-    this.numMessages = 0;
+    this.isFirstMessage = true;
 }
 
 Storm.prototype.logToFile = function(msg) {
@@ -89,10 +89,6 @@ Storm.prototype.storeLine = function(line) {
     this.lines.push(line);
 }
 
-Storm.prototype.isFirstMsg = function() {
-    return (this.numMessages === 0);
-}
-
 Storm.prototype.isTaskId = function(msg) {
     return (msg instanceof Array);
 }
@@ -102,9 +98,10 @@ Storm.prototype.handleNewMessage = function(msg) {
 
     this.logToFile('handleNewMessage ' + msg);
 
-    if (this.isFirstMsg()) {
+    if (this.isFirstMessage) {
         this.logToFile('first message');
         this.initSetupInfo(parsedMsg);
+        this.isFirstMessage = false;
     } else if (this.isTaskId(parsedMsg)) {
         this.logToFile('task id');
         this.handleNewTaskId(parsedMsg);
@@ -112,7 +109,6 @@ Storm.prototype.handleNewMessage = function(msg) {
         this.logToFile('command');
         this.handleNewCommand(parsedMsg);
     }
-    this.numMessages++;
 }
 
 Storm.prototype.handleNewTaskId = function(taskId) {
