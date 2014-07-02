@@ -147,10 +147,10 @@ Storm.prototype.emitDirect = function(tup, stream, id, directTask) {
     this.__emit(tup, stream, id, directTask)
 }
 
-Storm.prototype.initialize = function(conf, context, callback) {
+Storm.prototype.initialize = function(conf, context, done) {
     this.logToFile("CONF: " + JSON.stringify(conf));
     this.logToFile("CONTEXT: " + JSON.stringify(context));
-    callback();
+    done();
 }
 
 Storm.prototype.run = function() {
