@@ -218,7 +218,7 @@ BasicBolt.prototype.handleNewCommand = function(command) {
     this.anchorTuple = tup;
       var callback = function(err) {
           if (!!err) {
-              self.fail(tup);
+              self.fail(tup, err);
           }
           self.ack(tup);
       }
@@ -229,7 +229,7 @@ BasicBolt.prototype.ack = function(tup) {
     this.sendMsgToParent({"command": "ack", "id": tup.id});
 }
 
-BasicBolt.prototype.fail = function(tup) {
+BasicBolt.prototype.fail = function(tup, err) {
     this.sendMsgToParent({"command": "fail", "id": tup.id});
 }
 
