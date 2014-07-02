@@ -165,33 +165,6 @@ function Tuple(id, component, stream, task, values) {
     this.task = task;
     this.values = values;
 }
-//    def __repr__(self):
-//        return '<%s%s>' % (
-//                self.__class__.__name__,
-//                ''.join(' %s=%r' % (k, self.__dict__[k]) for k in sorted(self.__dict__.keys())))
-
-//function Bolt() {};
-//
-//Bolt.prototype.initialize = function(stormconf, context) {};
-//
-//Bolt.prototype.process = function(tuple) {};
-//
-//Bolt.prototype.run = function() {
-//        MODE = Bolt
-//        var setupInfo = initComponent();
-//        var conf = setupInfo[0];
-//        var context = setupInfo[1];
-//
-//        this.initialize(conf, context);
-//        try {
-//            while (true) {
-//                var tup = readTuple();
-//                this.process(tup);
-//            }
-//        } catch(err) {
-//            log(err);
-//        }
-//}
 
 function BasicBolt() {
     Storm.call(this);
