@@ -130,6 +130,12 @@ Storm.prototype.emitDirect = function(tup, stream, id, directTask) {
     this.__emit(tup, stream, id, directTask)
 }
 
+/**
+ * Initialize storm component according to the configuration received.
+ * @param conf configuration object accrding to storm protocol.
+ * @param context context object according to storm protocol.
+ * @param done callback. Call this method when finished initializing.
+ */
 Storm.prototype.initialize = function(conf, context, done) {
     done();
 }
@@ -146,6 +152,11 @@ function Tuple(id, component, stream, task, values) {
     this.values = values;
 }
 
+/**
+ * Base class for storm bolt.
+ * To create a bolt implement 'process' method.
+ * You may also implement initialize method to
+ */
 function BasicBolt() {
     Storm.call(this);
     this.anchorTuple = null;
@@ -153,8 +164,6 @@ function BasicBolt() {
 
 BasicBolt.prototype = Object.create(Storm.prototype);
 BasicBolt.prototype.constructor = BasicBolt;
-
-BasicBolt.prototype.process = function(tuple, done) {};
 
 BasicBolt.prototype.__emit = function(tup, stream, anchors, directTask) {
     var self = this;
@@ -195,6 +204,14 @@ BasicBolt.prototype.handleNewCommand = function(command) {
     this.process(tup, callback);
 }
 
+/**
+ * Implement this method when creating a bolt. This is the main method the provides the logic of the bolt (what
+ * should it do?).
+ * @param tuple the input of the bolt - what to process.
+ * @param done call this method when done processing.
+ */
+BasicBolt.prototype.process = function(tuple, done) {};
+
 BasicBolt.prototype.ack = function(tup) {
     this.sendMsgToParent({"command": "ack", "id": tup.id});
 }
@@ -203,16 +220,41 @@ BasicBolt.prototype.fail = function(tup, err) {
     this.sendMsgToParent({"command": "fail", "id": tup.id});
 }
 
+
+/**
+ * Base class for storm spout.
+ * To create a spout implement the following methods: nextTuple, ack and fail (nextTuple - mandatory, ack and fail
+ * can stay empty).
+ * You may also implement initialize method.
+ *
+ */
 function Spout() {
     Storm.call(this);
 };
+
 Spout.prototype = Object.create(Storm.prototype);
+
 Spout.prototype.constructor = Spout;
 
+/**
+ * This method will be called when an ack is received for preciously sent tuple. One may implement it.
+ * @param id The id of the tuple.
+ * @param done Call this method when finished and ready to receive more tuples.
+ */
 Spout.prototype.ack = function(id, done) {};
 
+/**
+ * This method will be called when an fail is received for preciously sent tuple. One may implement it (for example -
+ * log the failure or send the tuple again).
+ * @param id The id of the tuple.
+ * @param done Call this method when finished and ready to receive more tuples.
+ */
 Spout.prototype.fail = function(id, done) {};
 
+/**
+ * Method the indicates its time to emit the next tuple.
+ * @param done call this method when done sending the output.
+ */
 Spout.prototype.nextTuple = function(done) {};
 
 Spout.prototype.handleNewCommand = function(command) {
