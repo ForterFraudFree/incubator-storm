@@ -21,8 +21,6 @@ function RandomSentenceSpout(sentences) {
     this.runningTupleId = getRandomInt(0,Math.pow(2,16));
     this.sentences = sentences;
     this.pending = {};
-
-    storm.logToFile('CREATE NEW RandomSentenceSpout');
 };
 
 RandomSentenceSpout.prototype = Object.create(Spout.prototype);
@@ -43,13 +41,13 @@ RandomSentenceSpout.prototype.nextTuple = function(done) {
 }
 
 RandomSentenceSpout.prototype.ack = function(id, done) {
-    this.logToFile('Received ack for - ' + id);
+    this.log('Received ack for - ' + id);
     delete this.pending[id];
     done();
 }
 
 RandomSentenceSpout.prototype.fail = function(id, done) {
-    this.logToFile('Received fail for - ' + id);
+    this.log('Received fail for - ' + id);
     this.emit(this.pending[id], null, id, null);
     done();
 }

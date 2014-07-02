@@ -17,7 +17,7 @@ SplitSentenceBolt.prototype.process = function(tup, done) {
         var words = tup.values[0].split(" ");
         words.forEach(function(word) {
             self.emit([word], null, null, null, function(taskIds) {
-                self.logToFile(word + 'Sent to task ids - ' + taskIds);
+                self.log(word + 'Sent to task ids - ' + taskIds);
             });
         });
         done();

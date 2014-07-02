@@ -4,19 +4,10 @@
 
 var fs = require('fs');
 
-function logToFile(msg) {
-
-    fs.appendFileSync('/Users/anya/tmp/storm/log', msg + '\n\n\n');
-}
-
 function Storm() {
     this.lines = [];
     this.taskIdsCallbacks = [];
     this.isFirstMessage = true;
-}
-
-Storm.prototype.logToFile = function(msg) {
-    logToFile(this.name + ':\n' + msg);
 }
 
 Storm.prototype.sendMsgToParent = function(msg) {
@@ -48,7 +39,6 @@ Storm.prototype.initSetupInfo = function(setupInfo) {
 
 Storm.prototype.startReadingInput = function() {
     var self = this;
-    this.logToFile('Start reading input from stdin.');
 
     process.stdin.on('readable', function() {
         var chunk = process.stdin.read();
@@ -95,10 +85,10 @@ Storm.prototype.handleNewMessage = function(msg) {
         this.initSetupInfo(parsedMsg);
         this.isFirstMessage = false;
     } else if (this.isTaskIds(parsedMsg)) {
-        this.logToFile('New task ids received.');
+        this.log('New task ids received.');
         this.handleNewTaskId(parsedMsg);
     } else {
-        this.logToFile('New command received.');
+        this.log('New command received.');
         this.handleNewCommand(parsedMsg);
     }
 }
@@ -117,8 +107,9 @@ Storm.prototype.handleNewTaskId = function(taskIds) {
 }
 
 Storm.prototype.createDefaultEmitCallback = function(tupleId) {
+    var self = this;
     return function(taskIds) {
-        logToFile('Tuple ' + tupleId + ' sent to task ids - ' + JSON.stringify(taskIds));
+        self.log('Tuple ' + tupleId + ' sent to task ids - ' + JSON.stringify(taskIds));
     };
 }
 
@@ -144,7 +135,6 @@ Storm.prototype.initialize = function(conf, context, done) {
 }
 
 Storm.prototype.run = function() {
-    this.logToFile('Start running');
     this.startReadingInput();
 }
 
@@ -159,7 +149,6 @@ function Tuple(id, component, stream, task, values) {
 function BasicBolt() {
     Storm.call(this);
     this.anchorTuple = null;
-    this.name = 'BOLT'
 };
 
 BasicBolt.prototype = Object.create(Storm.prototype);
@@ -216,7 +205,6 @@ BasicBolt.prototype.fail = function(tup, err) {
 
 function Spout() {
     Storm.call(this);
-    this.name = 'SPOUT';
 };
 Spout.prototype = Object.create(Storm.prototype);
 Spout.prototype.constructor = Spout;
@@ -265,5 +253,4 @@ Spout.prototype.__emit = function(tup, stream, id, directTask) {
 }
 
 module.exports.BasicBolt = BasicBolt;
-module.exports.logToFile = logToFile;
 module.exports.Spout = Spout;
