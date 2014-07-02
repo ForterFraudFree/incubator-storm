@@ -11,7 +11,7 @@ function logToFile(msg) {
 
 function Storm() {
     this.lines = [];
-    this.taskIdCallbacks = [];
+    this.taskIdsCallbacks = [];
     this.isFirstMessage = true;
 }
 
@@ -89,7 +89,7 @@ Storm.prototype.storeLine = function(line) {
     this.lines.push(line);
 }
 
-Storm.prototype.isTaskId = function(msg) {
+Storm.prototype.isTaskIds = function(msg) {
     return (msg instanceof Array);
 }
 
@@ -102,7 +102,7 @@ Storm.prototype.handleNewMessage = function(msg) {
         this.logToFile('first message');
         this.initSetupInfo(parsedMsg);
         this.isFirstMessage = false;
-    } else if (this.isTaskId(parsedMsg)) {
+    } else if (this.isTaskIds(parsedMsg)) {
         this.logToFile('task id');
         this.handleNewTaskId(parsedMsg);
     } else {
@@ -111,15 +111,22 @@ Storm.prototype.handleNewMessage = function(msg) {
     }
 }
 
-Storm.prototype.handleNewTaskId = function(taskId) {
-    var callback = this.taskIdCallbacks.shift();
+Storm.prototype.handleNewTaskId = function(taskIds) {
+    //When new list of task ids arrives, the callback that was passed with the corresponding emit should be called.
+    //Storm assures that the task ids will be sent in the same order as their corresponding emits so it we can simply
+    //take the first callback in the list and be sure it is the right one.
+
+    var callback = this.taskIdsCallbacks.shift();
     if (callback) {
-        callback(taskId);
+        callback(taskIds);
     }
 }
 
 Storm.prototype.emit = function(tup, stream, id, directTask, callback) {
-    this.taskIdCallbacks.push(callback);
+    //Every emit triggers a response - list of task ids to which the tuple was emitted. The task ids are accessible
+    //through the callback (will be called when the response arrives). The callback is stored in a list until the
+    //corresponding task id list arrives.
+    this.taskIdsCallbacks.push(callback);
     this.__emit(tup, stream, id, directTask);
 }
 
