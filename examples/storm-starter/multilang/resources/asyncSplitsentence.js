@@ -23,7 +23,7 @@ SplitSentenceBolt.prototype.process = function(tup, done) {
         var words = tup.values[0].split(" ");
         words.forEach(function(word) {
             self.emit([word], null, null, null, function(taskId) {
-                storm.logToFile('Task id - ' + JSON.stringify(taskId) + ' work - ' + word);
+                self.logToFile(word + 'Sent to task ids - ' + taskIds);
             });
         });
         done();

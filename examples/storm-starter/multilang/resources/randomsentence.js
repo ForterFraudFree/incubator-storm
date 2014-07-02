@@ -43,13 +43,13 @@ RandomSentenceSpout.prototype.nextTuple = function(done) {
 }
 
 RandomSentenceSpout.prototype.ack = function(id, done) {
-    this.logToFile('RECEIVED ACK - ' + JSON.stringify(id));
+    this.logToFile('Received ack for - ' + id);
     delete this.pending[id];
     done();
 }
 
 RandomSentenceSpout.prototype.fail = function(id, done) {
-    this.logToFile('RECEIVED FAIL - ' + JSON.stringify(id));
+    this.logToFile('Received fail for - ' + id);
     this.emit(this.pending[id], null, id, null);
     done();
 }
