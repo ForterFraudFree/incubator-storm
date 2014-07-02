@@ -12,7 +12,7 @@ function SplitSentenceBolt() {
 SplitSentenceBolt.prototype = Object.create(BasicBolt.prototype);
 SplitSentenceBolt.prototype.constructor = SplitSentenceBolt;
 
-SplitSentenceBolt.prototype.process = function(tup, callback) {
+SplitSentenceBolt.prototype.process = function(tup, done) {
         var self = this;
         var words = tup.values[0].split(" ");
         words.forEach(function(word) {
@@ -20,7 +20,7 @@ SplitSentenceBolt.prototype.process = function(tup, callback) {
                 storm.logToFile('Task id - ' + JSON.stringify(taskIds) + ' work - ' + word);
             });
         });
-        callback();
+        done();
 }
 
 new SplitSentenceBolt().run();

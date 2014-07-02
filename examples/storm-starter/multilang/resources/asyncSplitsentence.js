@@ -15,7 +15,7 @@ function SplitSentenceBolt() {
 SplitSentenceBolt.prototype = Object.create(BasicBolt.prototype);
 SplitSentenceBolt.prototype.constructor = SplitSentenceBolt;
 
-SplitSentenceBolt.prototype.process = function(tup, callback) {
+SplitSentenceBolt.prototype.process = function(tup, done) {
     var self = this;
 
     // Here setTimeout is not really needed, we use it to demonstrate asynchronous code in the process method:
@@ -26,7 +26,7 @@ SplitSentenceBolt.prototype.process = function(tup, callback) {
                 storm.logToFile('Task id - ' + JSON.stringify(taskId) + ' work - ' + word);
             });
         });
-        callback();
+        done();
     }, 5000)
 }
 
