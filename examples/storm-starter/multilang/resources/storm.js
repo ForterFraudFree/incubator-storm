@@ -119,13 +119,26 @@ Storm.prototype.handleNewTaskId = function(taskIds) {
     var callback = this.taskIdsCallbacks.shift();
     if (callback) {
         callback(taskIds);
+    } else {
+        throw new Error('Something went wrong, we off the split of task id callbacks');
     }
+}
+
+Storm.prototype.createDefaultEmitCallback = function(tupleId) {
+    return function(taskIds) {
+        logToFile('Tuple ' + tupleId + ' sent to task ids - ' + JSON.stringify(taskIds));
+    };
 }
 
 Storm.prototype.emit = function(tup, stream, id, directTask, callback) {
     //Every emit triggers a response - list of task ids to which the tuple was emitted. The task ids are accessible
     //through the callback (will be called when the response arrives). The callback is stored in a list until the
     //corresponding task id list arrives.
+
+    if (!callback) {
+        callback = this.createDefaultEmitCallback(id);
+    }
+
     this.taskIdsCallbacks.push(callback);
     this.__emit(tup, stream, id, directTask);
 }
