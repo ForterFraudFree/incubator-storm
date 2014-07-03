@@ -3,6 +3,8 @@
  * Implements the storm multilang protocol for nodejs.
  */
 
+var fs = require('fs');
+
 function Storm() {
     this.lines = [];
     this.taskIdsCallbacks = [];
