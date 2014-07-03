@@ -114,11 +114,30 @@ Storm.prototype.createDefaultEmitCallback = function(tupleId) {
     };
 }
 
-Storm.prototype.emit = function(commandDetails, onTaskIds) {
+
+/**
+ *
+ * @param messageDetails json with the emit details.
+ *
+ * For bolt, the json must contain the required fields:
+ * - tuple - the value to emit
+ * and may contain the optional fields:
+ * - stream (if empty - emit to default stream)
+ *
+ * For spout, the json must contain the required fields:
+ * - tuple - the value to emit
+ *
+ * and may contain the optional fields:
+ * - id - pass id for reliable emit (and receive ack/fail later).
+ * - stream - if empty - emit to default stream.
+ *
+ * @param onTaskIds function than will be called with list of task ids the message was emitted to (when received).
+ */
+Storm.prototype.emit = function(messageDetails, onTaskIds) {
     //Every emit triggers a response - list of task ids to which the tuple was emitted. The task ids are accessible
     //through the callback (will be called when the response arrives). The callback is stored in a list until the
     //corresponding task id list arrives.
-    if (!!commandDetails.task) {
+    if (!!messageDetails.task) {
         throw new Error('Illegal input - task. To emit to specific task use emit direct!');
     }
 
@@ -127,9 +146,29 @@ Storm.prototype.emit = function(commandDetails, onTaskIds) {
     }
 
     this.taskIdsCallbacks.push(onTaskIds);
-    this.__emit(commandDetails);;
+    this.__emit(messageDetails);;
 }
 
+
+/**
+ * Emit message to specific task.
+ * @param messageDetails json with the emit details.
+ *
+ * For bolt, the json must contain the required fields:
+ * - tuple - the value to emit
+ * - task - indicate the task to send the tuple to.
+ * and may contain the optional fields:
+ * - stream (if empty - emit to default stream)
+ *
+ * For spout, the json must contain the required fields:
+ * - tuple - the value to emit
+ * - task - indicate the task to send the tuple to.
+ * and may contain the optional fields:
+ * - id - pass id for reliable emit (and receive ack/fail later).
+ * - stream - if empty - emit to default stream.
+ *
+ * @param onTaskIds function than will be called with list of task ids the message was emitted to (when received).
+ */
 Storm.prototype.emitDirect = function(commandDetails) {
     if (!commandDetails.task) {
         throw new Error("Emit direct must receive task id!")
@@ -175,9 +214,15 @@ BasicBolt.prototype.constructor = BasicBolt;
 BasicBolt.prototype.emitDirect = function(tup, stream, directTask) {
 
 }
+
 /**
- *
- * {tuple, stream, task}
+ * Emit message.
+ * @param commandDetails json with the required fields:
+ * - tuple - the value to emit
+ * - anchors - list of ids this emit relates to (used for reliability purposes).
+ * and the optional fields:
+ * - stream (if empty - emit to default stream)
+ * - task (pass only to emit to specific task)
  */
 BasicBolt.prototype.__emit = function(commandDetails) {
     var self = this;
@@ -283,9 +328,12 @@ Spout.prototype.handleNewCommand = function(command) {
 }
 
 /**
- *
- * tup, stream, id, directTask
- *
+ * @param commandDetails json with the required fields:
+ * - tuple - the value to emit.
+ * and the optional fields:
+ * - id - pass id for reliable emit (and receive ack/fail later).
+ * - stream - if empty - emit to default stream.
+ * - task - pass only to emit to specific task.
  */
 Spout.prototype.__emit = function(commandDetails) {
     var message = {
