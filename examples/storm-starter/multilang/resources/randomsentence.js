@@ -47,7 +47,7 @@ RandomSentenceSpout.prototype.ack = function(id, done) {
 }
 
 RandomSentenceSpout.prototype.fail = function(id, done) {
-    this.log('Received fail for - ' + id);
+    this.log('Received fail for - ' + id + '. Retrying.');
     this.emit(this.pending[id], null, id, null);
     done();
 }
