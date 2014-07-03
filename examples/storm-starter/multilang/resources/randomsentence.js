@@ -18,7 +18,7 @@ var SENTENCES = [
 
 function RandomSentenceSpout(sentences) {
     Spout.call(this);
-    this.runningTupleId = getRandomInt(0,Math.pow(2,16));
+    this.runningTupleId = 0;
     this.sentences = sentences;
     this.pending = {};
 };
@@ -33,11 +33,16 @@ RandomSentenceSpout.prototype.getRandomSentence = function() {
 RandomSentenceSpout.prototype.nextTuple = function(done) {
     var sentence = this.getRandomSentence();
     var tup = [sentence];
-    var id = this.runningTupleId;
+    var id = this.createNextTupleId();
     this.pending[id] = tup;
     this.emit(tup, null, id, null);
-    this.runningTupleId++;
     done();
+}
+
+RandomSentenceSpout.prototype.createNextTupleId = function() {
+    var id = this.runningTupleId;
+    this.runningTupleId++;
+    return id;
 }
 
 RandomSentenceSpout.prototype.ack = function(id, done) {
