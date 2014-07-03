@@ -1,5 +1,5 @@
 /**
- * Simple Bolt example - receives sentence and breaks it into words.
+ * Bolt example - receives sentence and breaks it into words.
  */
 
 var storm = require('./storm');

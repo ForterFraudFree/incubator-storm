@@ -1,5 +1,5 @@
 /**
- * Simple example for storm spout. Emits random sentences.
+ * Example for storm spout. Emits random sentences.
  * The original class in java - storm.starter.spout.RandomSentenceSpout.
  *
  * Created by anya on 6/26/14.

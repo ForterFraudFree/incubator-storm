@@ -1,5 +1,5 @@
 /**
- * Simple example for async bolt. Receives sentence and breaks it into words.
+ * Example for async bolt. Receives sentence and breaks it into words.
  *
  * Created by anya on 6/30/14.
  */
