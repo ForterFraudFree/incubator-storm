@@ -1,8 +1,7 @@
 /**
  * Base classes in node-js for storm Bolt and Spout.
+ * Implements the storm multilang protocol for nodejs.
  */
-
-var fs = require('fs');
 
 function Storm() {
     this.lines = [];
