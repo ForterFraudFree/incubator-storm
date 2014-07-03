@@ -16,8 +16,8 @@ SplitSentenceBolt.prototype.process = function(tup, done) {
         var self = this;
         var words = tup.values[0].split(" ");
         words.forEach(function(word) {
-            self.emit([word], null, null, null, function(taskIds) {
-                self.log(word + 'Sent to task ids - ' + taskIds);
+            self.emit({tuple: [word]}, function(taskIds) {
+                self.log(word + ' sent to task ids - ' + taskIds);
             });
         });
         done();

@@ -114,21 +114,27 @@ Storm.prototype.createDefaultEmitCallback = function(tupleId) {
     };
 }
 
-Storm.prototype.emit = function(tup, stream, id, directTask, callback) {
+Storm.prototype.emit = function(commandDetails, onTaskIds) {
     //Every emit triggers a response - list of task ids to which the tuple was emitted. The task ids are accessible
     //through the callback (will be called when the response arrives). The callback is stored in a list until the
     //corresponding task id list arrives.
-
-    if (!callback) {
-        callback = this.createDefaultEmitCallback(id);
+    if (!!commandDetails.task) {
+        throw new Error('Illegal input - task. To emit to specific task use emit direct!');
     }
 
-    this.taskIdsCallbacks.push(callback);
-    this.__emit(tup, stream, id, directTask);
+    if (!onTaskIds) {
+        throw new Error('You must pass a onTaskIds callback when using emit!')
+    }
+
+    this.taskIdsCallbacks.push(onTaskIds);
+    this.__emit(commandDetails);;
 }
 
-Storm.prototype.emitDirect = function(tup, stream, id, directTask) {
-    this.__emit(tup, stream, id, directTask)
+Storm.prototype.emitDirect = function(commandDetails) {
+    if (!commandDetails.task) {
+        throw new Error("Emit direct must receive task id!")
+    }
+    this.__emit(commandDetails);
 }
 
 /**
@@ -166,30 +172,29 @@ function BasicBolt() {
 BasicBolt.prototype = Object.create(Storm.prototype);
 BasicBolt.prototype.constructor = BasicBolt;
 
-BasicBolt.prototype.__emit = function(tup, stream, anchors, directTask) {
+BasicBolt.prototype.emitDirect = function(tup, stream, directTask) {
+
+}
+/**
+ *
+ * {tuple, stream, task}
+ */
+BasicBolt.prototype.__emit = function(commandDetails) {
     var self = this;
-    if (typeof anchors === 'undefined') {
-        anchors = [];
-    }
 
+    var anchors = [];
     if (this.anchorTuple !== null) {
-        anchors = [this.anchorTuple]
+        anchors = [this.anchorTuple.id]
     }
-    var m = {"command": "emit"};
+    var message = {
+        command: "emit",
+        tuple: commandDetails.tuple,
+        stream: commandDetails.stream,
+        task: commandDetails.task,
+        anchors: anchors
+    };
 
-    if (typeof stream !== 'undefined') {
-        m["stream"] = stream
-    }
-
-    m["anchors"] = anchors.map(function (a) {
-        return a.id;
-    });
-
-    if (typeof directTask !== 'undefined') {
-        m["task"] = directTask;
-    }
-    m["tuple"] = tup;
-    this.sendMsgToParent(m);
+    this.sendMsgToParent(message);
 }
 
 BasicBolt.prototype.handleNewCommand = function(command) {
@@ -277,22 +282,21 @@ Spout.prototype.handleNewCommand = function(command) {
     }
 }
 
-Spout.prototype.__emit = function(tup, stream, id, directTask) {
-    var m = {"command": "emit"};
-    if (typeof id !== 'undefined') {
-        m["id"] = id;
-    }
+/**
+ *
+ * tup, stream, id, directTask
+ *
+ */
+Spout.prototype.__emit = function(commandDetails) {
+    var message = {
+        command: "emit",
+        tuple: commandDetails.tuple,
+        id: commandDetails.id,
+        stream: commandDetails.stream,
+        task: commandDetails.task
+    };
 
-    if (typeof stream !== 'undefined') {
-        m["stream"] = stream;
-    }
-
-    if (typeof directTask !== 'undefined') {
-        m["task"] = directTask;
-    }
-
-    m["tuple"] = tup;
-    this.sendMsgToParent(m);
+    this.sendMsgToParent(message);
 }
 
 module.exports.BasicBolt = BasicBolt;

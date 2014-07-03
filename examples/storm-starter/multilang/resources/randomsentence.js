@@ -31,11 +31,14 @@ RandomSentenceSpout.prototype.getRandomSentence = function() {
 }
 
 RandomSentenceSpout.prototype.nextTuple = function(done) {
+    var self = this;
     var sentence = this.getRandomSentence();
     var tup = [sentence];
     var id = this.createNextTupleId();
     this.pending[id] = tup;
-    this.emit(tup, null, id, null);
+    this.emit({tuple: tup, id: id}, function(taskIds) {
+        self.log(tup + ' sent to task ids - ' + taskIds);
+    });
     done();
 }
 
@@ -53,7 +56,9 @@ RandomSentenceSpout.prototype.ack = function(id, done) {
 
 RandomSentenceSpout.prototype.fail = function(id, done) {
     this.log('Received fail for - ' + id + '. Retrying.');
-    this.emit(this.pending[id], null, id, null);
+    this.emit({tuple: this.pending[id], id:id}, function(taskIds) {
+        self.log(this.pending[id] + ' sent to task ids - ' + taskIds);
+    });
     done();
 }
 
