@@ -100,6 +100,9 @@ public class ShellSpout implements ISpout {
             while (true) {
                 JSONObject action = _process.readMessage();
                 String command = (String) action.get("command");
+                if (command == null) {
+                    throw new UnsupportedOperationException("Command not found in spout message: " + action.toString());
+                }
                 if (command.equals("sync")) {
                     return;
                 } else if (command.equals("log")) {

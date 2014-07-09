@@ -116,6 +116,9 @@ public class ShellBolt implements IBolt {
                         }
 
                         String command = (String) action.get("command");
+                        if (command == null) {
+                            throw new UnsupportedOperationException("Command not found in spout message: " + action.toString());
+                        }
                         if(command.equals("ack")) {
                             handleAck(action);
                         } else if (command.equals("fail")) {
